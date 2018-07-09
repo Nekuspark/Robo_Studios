@@ -89,6 +89,12 @@ void ARobo_StudiosCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	//Initializing our reference
+	LastItemSeen = nullptr;
+
+	//Initializing our Inventory
+	Inventory.SetNum(MAX_INVENTORY_ITEMS);
+
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
@@ -136,6 +142,9 @@ void ARobo_StudiosCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAxis("TurnRate", this, &ARobo_StudiosCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ARobo_StudiosCharacter::LookUpAtRate);
+
+	//Action mapping of pickup item
+	PlayerInputComponent->BindAction("Pickup", IE_Pressed, this, &ARobo_StudiosCharacter::KeyPickupItem);
 }
 
 void ARobo_StudiosCharacter::OnFire()
@@ -297,4 +306,63 @@ bool ARobo_StudiosCharacter::EnableTouchscreenMovement(class UInputComponent* Pl
 	}
 	
 	return false;
+}
+
+void ARobo_StudiosCharacter::Raycast()
+{
+	//Calculating start and end location
+	FVector StartLocation = FirstPersonCameraComponent->GetComponentLocation();
+	FVector EndLocation = StartLocation + (FirstPersonCameraComponent->GetForwardVector() * RaycastRange);
+
+	FHitResult RaycastHit;
+
+	//Raycast should ignore the character
+	FCollisionQueryParams CQP;
+	CQP.AddIgnoredActor(this);
+
+	//Raycast
+	GetWorld()->LineTraceSingleByChannel(RaycastHit, StartLocation, EndLocation, ECollisionChannel::ECC_WorldDynamic, CQP);
+
+
+	AKeyPickup* Pickup = Cast<AKeyPickup>(RaycastHit.GetActor());
+
+	if (LastItemSeen && LastItemSeen != Pickup)
+	{
+		//If our character sees a different pickup then disable the glowing effect on the previous seen item
+		LastItemSeen->SetGlowEffect(false);
+	}
+
+	if (Pickup)
+	{
+		//Enable the glow effect on the current item
+		LastItemSeen = Pickup;
+		Pickup->SetGlowEffect(true);
+	}//Re-Initialize 
+	else LastItemSeen = nullptr;
+
+}
+
+void ARobo_StudiosCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	//Raycast every frame
+	Raycast();
+}
+
+void ARobo_StudiosCharacter::KeyPickupItem()
+{
+	if (LastItemSeen)
+	{
+		//Find the first available slot
+		int32 AvailableSlot = Inventory.Find(nullptr);
+
+		if (AvailableSlot != INDEX_NONE)
+		{
+			//Add the item to the first valid slot we found
+			Inventory[AvailableSlot] = LastItemSeen;
+			//Destroy the item from the game
+			LastItemSeen->Destroy();
+		}
+		else GLog->Log("You can't carry any more items!");
+	}
 }

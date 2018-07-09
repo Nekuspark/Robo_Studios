@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "KeyPickup.h"
 #include "Robo_StudiosCharacter.generated.h"
+
+#define MAX_INVENTORY_ITEMS 4
 
 class UInputComponent;
 
@@ -138,5 +141,27 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+private:
+	/*Raycasts in front of the character to find usable items*/
+	void Raycast();
+
+	/*Reference to the last seen pickup item. Nullptr if none*/
+	AKeyPickup* LastItemSeen;
+
+public:
+	virtual void Tick(float DeltaSeconds) override;
+
+protected:
+	/*The range of the raycast*/
+	UPROPERTY(EditAnywhere)
+		float RaycastRange = 250.f;
+
+	/*Handles the Pickup Input*/
+	UFUNCTION()
+		void KeyPickupItem();
+
+	/*The actual Inventory*/
+	UPROPERTY(VisibleAnywhere)
+		TArray<AKeyPickup*> Inventory;
 };
 
