@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include "MyPlayerController.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -145,6 +146,16 @@ void ARobo_StudiosCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 
 	//Action mapping of pickup item
 	PlayerInputComponent->BindAction("Pickup", IE_Pressed, this, &ARobo_StudiosCharacter::KeyPickupItem);
+
+	FInputActionBinding InventoryBinding;
+	//We need this bind to execute on pause state
+	InventoryBinding.bExecuteWhenPaused = true;
+	InventoryBinding.ActionDelegate.BindDelegate(this, FName("HandleInventoryInput"));
+	InventoryBinding.ActionName = FName("Inventory");
+	InventoryBinding.KeyEvent = IE_Pressed;
+
+	//Binding the Inventory action
+	PlayerInputComponent->AddActionBinding(InventoryBinding);
 }
 
 void ARobo_StudiosCharacter::OnFire()
@@ -363,6 +374,38 @@ void ARobo_StudiosCharacter::KeyPickupItem()
 			//Destroy the item from the game
 			LastItemSeen->Destroy();
 		}
-		else GLog->Log("You can't carry any more items!");
+		else {
+			GLog->Log("You can't carry any more items!");
+		}
 	}
+}
+
+void ARobo_StudiosCharacter::HandleInventoryInput()
+{
+	UE_LOG(LogTemp, Warning, TEXT("1"));
+	AMyPlayerController* Con = Cast<AMyPlayerController>(GetController());
+	if (Con) Con->HandleInventoryInput();
+	
+}
+
+void ARobo_StudiosCharacter::SetEquippedItem(UTexture2D * Texture)
+{
+	if (Texture)
+	{
+		//For this scenario we make the assumption that
+		//every pickup has a unique texture.
+		//So, in order to set the equipped item we just check every item
+		//inside our Inventory. Once we find an item that has the same image as the
+		//Texture image we're passing as a parameter we mark that item as CurrentlyEquipped.
+		for (auto It = Inventory.CreateIterator(); It; It++)
+		{
+			if ((*It) && (*It)->GetKeyPickupTexture() && (*It)->GetKeyPickupTexture()->HasSameSourceArt(Texture))
+			{
+				CurrentlyEquippedItem = *It;
+				GLog->Log("I've set a new equipped item: " + CurrentlyEquippedItem->GetName());
+				break;
+			}
+		}
+	}
+	else GLog->Log("The Player has clicked an empty inventory slot");
 }

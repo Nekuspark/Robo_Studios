@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "InventoryWidget.h"
 #include "MyPlayerController.generated.h"
 
 /**
@@ -14,7 +15,24 @@ class ROBO_STUDIOS_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
-	
+private:
+	/*InventoryWidget reference*/
+	UInventoryWidget * InventoryWidgetRef;
+
+	/*True if the inventory is currently open - false otherwise*/
+	bool bIsInventoryOpen;
+
+protected:
+	/*InventoryWidget Blueprint reference*/
+	UPROPERTY(EditDefaultsOnly)
+		TSubclassOf<UInventoryWidget> InventoryWidgetBP;
+
+
+public:
+	virtual void Possess(APawn* InPawn) override;
+
+	/*Opens or closes the inventory*/
+	void HandleInventoryInput();
 	
 	
 };

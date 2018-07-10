@@ -150,6 +150,7 @@ private:
 
 public:
 	virtual void Tick(float DeltaSeconds) override;
+	TArray<AKeyPickup*> GetInventory() { return Inventory; }
 
 protected:
 	/*The range of the raycast*/
@@ -163,5 +164,16 @@ protected:
 	/*The actual Inventory*/
 	UPROPERTY(VisibleAnywhere)
 		TArray<AKeyPickup*> Inventory;
-};
 
+	/*Handles the Inventory Input by sending information to the controller*/
+	UFUNCTION()
+		void HandleInventoryInput();
+
+private:
+	/*Reference to the currently equipped item*/
+	AKeyPickup * CurrentlyEquippedItem;
+
+public:
+	/*Sets a new equipped item based on the given texture*/
+	void SetEquippedItem(UTexture2D* Texture);
+};

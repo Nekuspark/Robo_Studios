@@ -1,10 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "InventorySlotWidget.h"
+#include "Robo_StudiosCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 void UInventorySlotWidget::SetEquippedItem()
 {
-	//Empty for now
+	ARobo_StudiosCharacter* Char = Cast<ARobo_StudiosCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (Char)
+	{
+		Char->SetEquippedItem(ItemTexture);
+	}
 }
 
 void UInventorySlotWidget::SetItemTexture(AKeyPickup* Item)
