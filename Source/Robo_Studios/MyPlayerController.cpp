@@ -38,8 +38,6 @@ void AMyPlayerController::HandleInventoryInput()
 			FInputModeGameOnly InputMode;
 			SetInputMode(InputMode);
 
-			UE_LOG(LogTemp, Warning, TEXT("7"));
-
 			//Unpause the game
 			SetPause(false);
 		}

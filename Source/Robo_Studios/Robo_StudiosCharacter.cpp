@@ -43,7 +43,7 @@ ARobo_StudiosCharacter::ARobo_StudiosCharacter()
 	Mesh1P->RelativeLocation = FVector(-0.5f, -4.4f, -155.7f);
 
 	// Create a gun mesh component
-	FP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
+	/*FP_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
 	FP_Gun->SetOnlyOwnerSee(true);			// only the owning player will see this mesh
 	FP_Gun->bCastDynamicShadow = false;
 	FP_Gun->CastShadow = false;
@@ -52,7 +52,7 @@ ARobo_StudiosCharacter::ARobo_StudiosCharacter()
 
 	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
 	FP_MuzzleLocation->SetupAttachment(FP_Gun);
-	FP_MuzzleLocation->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
+	FP_MuzzleLocation->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));*/
 
 	// Default offset from the character location for projectiles to spawn
 	GunOffset = FVector(100.0f, 0.0f, 10.0f);
@@ -69,7 +69,7 @@ ARobo_StudiosCharacter::ARobo_StudiosCharacter()
 
 	// Create a gun and attach it to the right-hand VR controller.
 	// Create a gun mesh component
-	VR_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VR_Gun"));
+	/*VR_Gun = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VR_Gun"));
 	VR_Gun->SetOnlyOwnerSee(true);			// only the owning player will see this mesh
 	VR_Gun->bCastDynamicShadow = false;
 	VR_Gun->CastShadow = false;
@@ -79,7 +79,7 @@ ARobo_StudiosCharacter::ARobo_StudiosCharacter()
 	VR_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("VR_MuzzleLocation"));
 	VR_MuzzleLocation->SetupAttachment(VR_Gun);
 	VR_MuzzleLocation->SetRelativeLocation(FVector(0.000004, 53.999992, 10.000000));
-	VR_MuzzleLocation->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));		// Counteract the rotation of the VR gun model.
+	VR_MuzzleLocation->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));*/		// Counteract the rotation of the VR gun model.
 
 	// Uncomment the following line to turn motion controllers on by default:
 	//bUsingMotionControllers = true;
@@ -97,17 +97,17 @@ void ARobo_StudiosCharacter::BeginPlay()
 	Inventory.SetNum(MAX_INVENTORY_ITEMS);
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
-	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
+	//FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 
 	// Show or hide the two versions of the gun based on whether or not we're using motion controllers.
 	if (bUsingMotionControllers)
 	{
-		VR_Gun->SetHiddenInGame(false, true);
+		//VR_Gun->SetHiddenInGame(false, true);
 		Mesh1P->SetHiddenInGame(true, true);
 	}
 	else
 	{
-		VR_Gun->SetHiddenInGame(true, true);
+		//VR_Gun->SetHiddenInGame(true, true);
 		Mesh1P->SetHiddenInGame(false, true);
 	}
 }
@@ -125,7 +125,7 @@ void ARobo_StudiosCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	// Bind fire event
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ARobo_StudiosCharacter::OnFire);
+	//PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ARobo_StudiosCharacter::OnFire);
 
 	// Enable touchscreen input
 	EnableTouchscreenMovement(PlayerInputComponent);
@@ -156,9 +156,12 @@ void ARobo_StudiosCharacter::SetupPlayerInputComponent(class UInputComponent* Pl
 
 	//Binding the Inventory action
 	PlayerInputComponent->AddActionBinding(InventoryBinding);
+
+	//Action mapping of dropping the selected item
+	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &ARobo_StudiosCharacter::DropEquippedItem);
 }
 
-void ARobo_StudiosCharacter::OnFire()
+/*void ARobo_StudiosCharacter::OnFire()
 {
 	// try and fire a projectile
 	if (ProjectileClass != NULL)
@@ -204,7 +207,7 @@ void ARobo_StudiosCharacter::OnFire()
 			AnimInstance->Montage_Play(FireAnimation, 1.f);
 		}
 	}
-}
+}*/
 
 void ARobo_StudiosCharacter::OnResetVR()
 {
@@ -219,7 +222,7 @@ void ARobo_StudiosCharacter::BeginTouch(const ETouchIndex::Type FingerIndex, con
 	}
 	if ((FingerIndex == TouchItem.FingerIndex) && (TouchItem.bMoved == false))
 	{
-		OnFire();
+		//OnFire();
 	}
 	TouchItem.bIsPressed = true;
 	TouchItem.FingerIndex = FingerIndex;
@@ -358,6 +361,33 @@ void ARobo_StudiosCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	//Raycast every frame
 	Raycast();
+
+	//check for items to make acid
+	int32 Plant = Inventory.Find("plant");
+	int32 Soap = Inventory.Find("plant");
+	int32 Flask = Inventory.Find("plant");
+
+	if (Plant != INDEX_NONE)
+	{
+		if (Soap != INDEX_NONE) {
+			if (Flask != INDEX_NONE) {
+				//The location of the drop
+				FVector DropLocation = GetActorLocation() + (GetActorForwardVector() * 200);
+
+				//Making a transform with default rotation and scale. Just setting up the location
+				//that was calculated above
+				FTransform Transform; Transform.SetLocation(DropLocation);
+
+				//Default actor spawn parameters
+				FActorSpawnParameters SpawnParams;
+
+				AKeyPickup* PickupToSpawn = GetWorld()->SpawnActor<AKeyPickup>(CurrentlyEquippedItem->GetClass(), Transform, SpawnParams);
+			}
+		}
+	}
+	else {
+		GLog->Log("You can't carry any more items!");
+	}
 }
 
 void ARobo_StudiosCharacter::KeyPickupItem()
@@ -408,4 +438,33 @@ void ARobo_StudiosCharacter::SetEquippedItem(UTexture2D * Texture)
 		}
 	}
 	else GLog->Log("The Player has clicked an empty inventory slot");
+}
+
+void ARobo_StudiosCharacter::DropEquippedItem()
+{
+	if (CurrentlyEquippedItem)
+	{
+		int32 IndexOfItem;
+		if (Inventory.Find(CurrentlyEquippedItem, IndexOfItem))
+		{
+			//The location of the drop
+			FVector DropLocation = GetActorLocation() + (GetActorForwardVector() * 200);
+
+			//Making a transform with default rotation and scale. Just setting up the location
+			//that was calculated above
+			FTransform Transform; Transform.SetLocation(DropLocation);
+
+			//Default actor spawn parameters
+			FActorSpawnParameters SpawnParams;
+
+			//Spawning our pickup
+			AKeyPickup* PickupToSpawn = GetWorld()->SpawnActor<AKeyPickup>(CurrentlyEquippedItem->GetClass(), Transform, SpawnParams);
+
+			if (PickupToSpawn)
+			{
+				//Unreference the item we've just placed
+				Inventory[IndexOfItem] = nullptr;
+			}
+		}
+	}
 }
