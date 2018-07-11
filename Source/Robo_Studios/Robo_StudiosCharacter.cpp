@@ -11,7 +11,12 @@
 #include "Kismet/GameplayStatics.h"
 #include "MotionControllerComponent.h"
 #include "XRMotionControllerBase.h" // for FXRMotionControllerBase::RightHandSourceId
+#include <string>
+#include <iostream>
+#include "Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h"
 #include "MyPlayerController.h"
+
+using namespace std;
 
 DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
@@ -363,31 +368,68 @@ void ARobo_StudiosCharacter::Tick(float DeltaSeconds)
 	Raycast();
 
 	//check for items to make acid
-	int32 Plant = Inventory.Find("plant");
-	int32 Soap = Inventory.Find("plant");
-	int32 Flask = Inventory.Find("plant");
+	/*FString Plant = "Plant";
+	int plantNum;
+	FString Soap = "Soap";
+	int soapNum;
+	FString Flask = "Flask";
+	int flaskNum;
+	bool cont = false;
 
-	if (Plant != INDEX_NONE)
+	for (int x = 0; x < 4; x++)
 	{
-		if (Soap != INDEX_NONE) {
-			if (Flask != INDEX_NONE) {
-				//The location of the drop
-				FVector DropLocation = GetActorLocation() + (GetActorForwardVector() * 200);
 
-				//Making a transform with default rotation and scale. Just setting up the location
-				//that was calculated above
-				FTransform Transform; Transform.SetLocation(DropLocation);
-
-				//Default actor spawn parameters
-				FActorSpawnParameters SpawnParams;
-
-				AKeyPickup* PickupToSpawn = GetWorld()->SpawnActor<AKeyPickup>(CurrentlyEquippedItem->GetClass(), Transform, SpawnParams);
-			}
+		if (Plant == Inventory[x]->GetName())
+		{
+			plantNum = x;
+			cont = true;
 		}
 	}
-	else {
-		GLog->Log("You can't carry any more items!");
-	}
+	if (cont == true)
+	{
+		cont = false;
+		for (int y = 0; y < 4; y++)
+		{
+			if (Soap == Inventory[y]->GetName())
+			{
+				soapNum = y;
+				cont = true;
+			}
+		}
+		if (cont == true)
+		{
+			cont = false;
+			for (int z = 0; z < 4; z++)
+			{
+
+				if (Flask == Inventory[z]->GetName())
+				{
+					flaskNum = z;
+
+					Inventory[plantNum] = nullptr;
+					Inventory[soapNum] = nullptr;
+					Inventory[flaskNum] = nullptr;
+
+					//The location of the drop
+					FVector DropLocation = GetActorLocation() + (GetActorForwardVector() * 200);
+
+					//Making a transform with default rotation and scale. Just setting up the location
+					//that was calculated above
+					FTransform Transform; Transform.SetLocation(DropLocation);
+
+					//Default actor spawn parameters
+					FActorSpawnParameters SpawnParams;
+
+					static ConstructorHelpers::FObjectFinder<UBlueprint> Acid(TEXT("/Game/MyStuff/Pickups/Acid.Acid"));
+					UClass* AcidBP = Acid.Object->GeneratedClass;
+
+					//Spawning our pickup
+					AKeyPickup* PickupToSpawn = GetWorld()->SpawnActor<AKeyPickup>(AcidBP, Transform, SpawnParams);
+				}
+			}
+		}
+	}*/
+	
 }
 
 void ARobo_StudiosCharacter::KeyPickupItem()
@@ -412,7 +454,6 @@ void ARobo_StudiosCharacter::KeyPickupItem()
 
 void ARobo_StudiosCharacter::HandleInventoryInput()
 {
-	UE_LOG(LogTemp, Warning, TEXT("1"));
 	AMyPlayerController* Con = Cast<AMyPlayerController>(GetController());
 	if (Con) Con->HandleInventoryInput();
 	
