@@ -20,10 +20,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = UI)
 		void Show();
 
-	/*Removes the widget from the viewport*/
-	UFUNCTION(BlueprintImplementableEvent, Category = UI)
-		void Hide();
-
 	/*Stores a reference in order to bind information on inventory slots*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		TArray<AKeyPickup*> ItemsArray;

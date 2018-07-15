@@ -7,9 +7,8 @@
 #include "KeyPickup.h"
 #include "Robo_StudiosCharacter.generated.h"
 
-#define MAX_INVENTORY_ITEMS 4
-
 class UInputComponent;
+#define MAX_INVENTORY_ITEMS 4
 
 UCLASS(config=Game)
 class ARobo_StudiosCharacter : public ACharacter
@@ -148,15 +147,6 @@ private:
 	/*Reference to the last seen pickup item. Nullptr if none*/
 	AKeyPickup* LastItemSeen;
 
-public:
-	virtual void Tick(float DeltaSeconds) override;
-	TArray<AKeyPickup*> GetInventory() { return Inventory; }
-
-protected:
-	/*The range of the raycast*/
-	UPROPERTY(EditAnywhere)
-		float RaycastRange = 250.f;
-
 	/*Handles the Pickup Input*/
 	UFUNCTION()
 		void KeyPickupItem();
@@ -169,15 +159,26 @@ protected:
 	UFUNCTION()
 		void HandleInventoryInput();
 
-private:
 	/*Reference to the currently equipped item*/
 	AKeyPickup * CurrentlyEquippedItem;
+
+	/*Drops the currently equipped item*/
+	UFUNCTION()
+		void DropEquippedItem();
 
 public:
 	/*Sets a new equipped item based on the given texture*/
 	void SetEquippedItem(UTexture2D* Texture);
 
-	/*Drops the currently equipped item*/
-	UFUNCTION()
-		void DropEquippedItem();
+	virtual void Tick(float DeltaSeconds) override;
+
+	TArray<AKeyPickup*> GetInventory() { return Inventory; }
+
+protected:
+	/*The range of the raycast*/
+	UPROPERTY(EditAnywhere)
+		float RaycastRange = 250.f;
+
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AKeyPickup> KeyPickupBPRef;
 };

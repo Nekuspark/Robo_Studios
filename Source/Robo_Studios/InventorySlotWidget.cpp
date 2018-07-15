@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "InventorySlotWidget.h"
+#include "Robo_Studios.h"
 #include "Robo_StudiosCharacter.h"
 #include "Kismet/GameplayStatics.h"
 

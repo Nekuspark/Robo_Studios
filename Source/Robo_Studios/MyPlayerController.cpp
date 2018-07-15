@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyPlayerController.h"
+#include "Robo_Studios.h"
 #include "Robo_StudiosCharacter.h"
 
 void AMyPlayerController::Possess(APawn* InPawn)
@@ -11,6 +12,7 @@ void AMyPlayerController::Possess(APawn* InPawn)
 	{
 		//Create the Inventory Widget based on the Blueprint reference we will input from within the Editor
 		InventoryWidgetRef = CreateWidget<UInventoryWidget>(this, InventoryWidgetBP);
+		InventoryWidgetRef->RemoveFromViewport();
 
 	}
 
